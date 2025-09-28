@@ -1,0 +1,35 @@
+services:
+  api:
+    build:
+      context: ./api
+    env_file: .env.local
+    ports:
+      - 8080:5000
+    # volumes:
+    #   - ./api:/api
+    restart: "unless-stopped"
+    depends_on:
+      localstack:
+        condition: service_healthy
+  worker:
+    build:
+      context: ./worker
+    env_file: .env.local
+    # volumes:
+    #   - ./worker:/worker
+    restart: "unless-stopped"
+    depends_on:
+      localstack:
+        condition: service_healthy
+  localstack:
+    container_name: localstack
+    image: localstack/localstack:latest
+    environment:
+      BUCKET_NAME: iscat
+      QUEUE_NAME: iscat
+    volumes:
+      - "./local/localstack/init.sh:/etc/localstack/init/ready.d/init.sh"
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:4566/_localstack/health"]
+      interval: 5s
+      retries: 5

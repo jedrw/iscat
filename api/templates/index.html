@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Is cat?</title>
+  </head>
+  <body>
+    <h1>Upload an image to scan for cats (jpeg/jpg/png)</h1>
+    <form id="upload-form">
+      <input
+        type="file"
+        name="file"
+        id="file"
+        accept=".png,.jpg,.jpeg"
+        required
+      />
+      <button type="submit">Upload</button>
+    </form>
+
+    <h1>Check result</h1>
+    <input type="text" id="image-id" placeholder="Enter image ID" />
+    <button onclick="checkResult()">Check</button>
+
+    <div id="output"></div>
+
+    <script>
+      const output = document.getElementById("output");
+
+      document
+        .getElementById("upload-form")
+        .addEventListener("submit", async (e) => {
+          e.preventDefault();
+          const formData = new FormData();
+          formData.append("file", document.getElementById("file").files[0]);
+
+          const res = await fetch("/scan", { method: "POST", body: formData });
+          const data = await res.json();
+          output.innerText = JSON.stringify(data, null, 2);
+        });
+
+      async function checkResult() {
+        const imageId = document.getElementById("image-id").value.trim();
+        const res = await fetch(`/result/${imageId}`);
+        const data = await res.json();
+        output.innerText = JSON.stringify(data, null, 2);
+      }
+    </script>
+  </body>
+</html>
